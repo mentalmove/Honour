@@ -339,10 +339,21 @@
                  */
                 console.log( eval(given.replace(/\-\-/g, "+")) );
             }
+            
+            function demonstrate () {
+                var forms = document.getElementsByTagName("form");
+                clear_input(forms[0]);
+                clear_input(forms[1]);
+                forms[0].in.value = "557876";
+                forms[0].out.value = "Click FIND";
+                forms[1].in.value = "-1 / 2x * 34567 + 89 - 7654 / 3x";
+                calculate(forms[1]);
+                forms[1].out.value = "Enter own term (including brackets)";
+            }
         
         </script>
     </head>
-    <body>
+    <body onload="demonstrate()">
         
         <div style="width: 45%; float: right">
             <form>
