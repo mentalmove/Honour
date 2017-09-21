@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+        <title>A Question of Honour</title>
+        <style type="text/css">
+            html, body {
+                color: #424244;
+                font-family: "HelveticaNeue-Light", Helvetica,Arial, sans-serif;
+                font-size: 18px;
+                background: #F4F4F3;
+                background: -webkit-linear-gradient(-60deg, #D6D6D5, #FDFDFC);
+                background: -o-linear-gradient(-60deg, #D6D6D5, #FDFDFC);
+                background: -moz-linear-gradient(-60deg, #D6D6D5, #FDFDFC);
+                background: linear-gradient(-60deg, #D6D6D5, #FDFDFC);
+                margin: 0px;
+            }
+            
+            div {
+                margin: 16px;
+                padding: 4px;
+            }
+            
+            #draw_wrapper {
+                clear: both;
+                position: absolute;
+                left: 0px;
+                bottom: 16px;
+                width: 98%;
+                text-align: center;
+            }
+            
+            #draw_zone {
+                width: 960px;
+                height: 540px;
+                border: thin solid #E0E0E0;
+            }
+        </style>
+        
+        <script type="text/javascript">
+            
+            function iD (x) {
+                return document.getElementById(x);
+            }
+            
+            /*  */
+        
+            function clear_input (form) {
+                form.in.value = "";
+                form.out.value = "";
+            }
+            
+            /*  */
+            
+            function find_largest_below (tgt) {
+                for ( var i = 0; i < (tgt.length - 1); i++ ) {
+                    if ( tgt[i] > tgt[i + 1] ) {
+                        tgt[i]--;
+                        for ( var j = (i + 1); j < tgt.length; j++ )
+                            tgt[j] = 9;
+                        /**
+                         * No logical need for condition;
+                         * increases speed in any case except for the worst
+                         */
+                        if ( i && tgt[i - 1] > tgt[i] )
+                            return find_largest_below(tgt);
+                    }
+                }
+
+                if ( !tgt[0] )
+                    tgt.shift();
+                
+                return tgt.join("");
+            }
+            function find_largest (form) {
+                var given = form.in.value.trim();
+                if ( !given || given.match(/\D/) ) {
+                    clear_input (form);
+                    return;
+                }
+                
+                var src = [];
+                for ( var i = 0; i < given.length; i++ )
+                    src.push( parseInt(given[i]) );
+                
+                form.out.value = find_largest_below(src);
+            }
+            
+            /*  */
+            
+            var MAX_X = 480;
+            var MAX_Y = 270;
+            
+            function draw_graph (values) {
+                
+                var draw_zone = iD("draw_zone");
+                var context = draw_zone.getContext("2d");
+                context.clearRect(0, 0, draw_zone.width, draw_zone.height);
+                
+                var w = draw_zone.width;
+                var h = draw_zone.height;
+                var center_x = parseInt(w / 2);
+                var center_y = parseInt(h / 2);
+                
+                context.lineWidth = 1;
+                
+                context.strokeStyle = "#CCCCCC";
+                context.beginPath();
+                context.moveTo(0, center_y);
+                context.lineTo(w, center_y);
+                context.moveTo(center_x, 0);
+                context.lineTo(center_x, h);
+                context.stroke();
+                context.closePath();
+                
+                context.strokeStyle = "#000000";
+                context.beginPath();
+                for ( var i = 0; i < (values.length - 1); i++ ) {
+                    context.moveTo(values[i][0] + center_x, center_y - values[i][1]);
+                    context.lineTo(values[i + 1][0] + center_x, center_y - values[i + 1][1]);
+                }
+                context.stroke();
+                context.closePath();
+            }
+            function get_values (raw_term) {
+                
+                var term = raw_term.replace(/([\d\.])+x/g, "($1*x)");
+                
+                var tmp_term, result;
+                
+                var step = MAX_X;
+                var i;
+                
+                var lowest, highest;
+                
+                while ( !(step % 2) )
+                    step /= 2;
+                
+                for ( i = (0 - MAX_X); i <= MAX_X; i += step ) {
+                    tmp_term = term.replace(/x/g, "" + i);
+                    result = Math.round(parseFloat(brackets(tmp_term)));
+                    if ( result >= (0 - MAX_Y) && result <= MAX_Y ) {
+                        lowest = [i, result];
+                        break;
+                    }
+                }
+                
+                if ( !lowest )
+                    return "Out of range";
+                
+                for ( i = MAX_X; i >= (0 - MAX_X); i -= step ) {
+                    tmp_term = term.replace(/x/g, "" + i);
+                    result = Math.round(parseFloat(brackets(tmp_term)));
+                    if ( result >= (0 - MAX_Y) && result <= MAX_Y ) {
+                        highest = [i, result];
+                        break;
+                    }
+                }
+                
+                if ( lowest[0] != (0 - MAX_X) ) {
+                    for ( i = lowest[0]; i >= (0 - MAX_X); i-- ) {
+                        tmp_term = term.replace(/x/g, "" + i);
+                        result = Math.round(parseFloat(brackets(tmp_term)));
+                        if ( result >= (0 - MAX_Y) && result <= MAX_Y ) {
+                            lowest = [i, result];
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                
+                if ( highest[0] != MAX_X ) {
+                    for ( i = highest[0]; i <= MAX_X; i++ ) {
+                        tmp_term = term.replace(/x/g, "" + i);
+                        result = Math.round(parseFloat(brackets(tmp_term)));
+                        if ( result >= (0 - MAX_Y) && result <= MAX_Y ) {
+                            highest = [i, result];
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                
+                var simple = (term.match(/x/g).length == 1) ? 1 : 0;
+                if ( simple && term.indexOf("/") != -1 && term.indexOf("/") < term.indexOf("x") )
+                    simple = 0;
+                if ( simple ) {
+                    draw_graph( [lowest, highest] );
+                }
+                else {
+                    var values = [];
+                    var tmp_values;                    
+                    for ( i = lowest[0]; i < highest[0]; i += step ) {
+                        tmp_term = term.replace(/x/g, "" + i);
+                        result = Math.round(parseFloat(brackets(tmp_term)));
+                        if ( result >= (0 - MAX_Y) && result <= MAX_Y )
+                            values.push([i, result]);
+                    }
+                    values.push(highest);
+                    draw_graph(values);
+                }
+                
+                return "See graph";
+            }
+            
+            /*  */
+            
+            function minus_to_z (raw_term) {
+                var term = raw_term.replace(/^\-/, "z");
+                term = term.replace(/([+\-\*\/\(])(\-)(\d)/g, "$1z$3");
+                return term;
+            }
+            function z_to_minus (result) {
+                return result.replace(/^z/, "-");
+            }
+            function single_calc (term, operator) {
+                
+                var values = term.split(operator);
+                var first = parseFloat(z_to_minus(values[0]));
+                var second = parseFloat(z_to_minus(values[1]));
+                
+                var to_return;
+                switch ( operator ) {
+                    case "+":
+                        to_return = first + second;
+                    break;
+                    case "-":
+                        to_return = first - second;
+                    break;
+                    case "*":
+                        to_return = first * second;
+                    break;
+                    case "/":
+                        if ( values[1] == "0" )
+                            return "0";
+                        to_return = first / second;
+                }
+                
+                return minus_to_z("" + to_return);
+            }
+            function evaluate (term) {
+                
+                var operators = term.match(/[+\-\*\/]/g);
+                
+                /**
+                 * e.g.
+                 *      '(1 + 2)'           => '1 + 2'      => '3'
+                 *      '((1 + 2))'         => '(1 + 2)'    => '1 + 2'      => '3'
+                 */
+                if ( !operators )
+                    return term;
+                
+                if ( operators.length == 1 )
+                    return single_calc(term, operators[0]);
+                
+                var numbers = term.match(/[z\d\.]+/g);
+                /**
+                 * e.g.
+                 *      '1 + 2 * 3'         => '1 + (2 * 3)'
+                 */
+                if ( operators[0].match(/[+\-]/) && operators[1].match(/[\*\/]/) ) {
+                    numbers[1] = "(" + numbers[1];
+                    numbers[2] += ")";
+                }
+                /**
+                 * e.g.
+                 *      '1 + 2 + 3'         => '(1 + 2) + 3'
+                 *      '1 * 2 + 3'         => '(1 * 2) + 3'
+                 *      '1 * 2 * 3'         => '(1 * 2) * 3'
+                 */
+                else {
+                    numbers[0] = "(" + numbers[0];
+                    numbers[1] += ")";
+                }
+                
+                var to_return = "";
+                for ( var i = 0; i < operators.length; i++ )
+                    to_return += numbers[i] + operators[i];
+                to_return += numbers[numbers.length - 1];
+                
+                return brackets(to_return);
+            }
+            function brackets (raw_term) {
+                
+                /**
+                 * Transform negative numbers, e.g.
+                 *      '1 + -1'            => '1 + z1'
+                 */
+                var term = minus_to_z(raw_term);
+                
+                var open_bracket;
+                for ( var i = 0; i < term.length; i++ ) {
+                    if ( term[i] == "(" ) {
+                        open_bracket = i;
+                        continue;
+                    }
+                    if ( term[i] == ")" )
+                        /**
+                         * Replace most inner bracket with calculated result
+                         */
+                        return brackets( term.substring(0, open_bracket) + evaluate(term.substring(open_bracket + 1, i)) + term.substring(i + 1) );
+                }
+
+                /**
+                 * No brackets in term or subterm
+                 * Transform eventual leading 'z' to '-'
+                 */
+                return z_to_minus(evaluate(term));
+            }
+            function calculate (form) {
+                
+                var given = form.in.value.replace(/[^\d\(\)+\-\*\/\.x]/g, "");
+                if ( !given ) {
+                    clear_input(form);
+                    return;
+                }
+                
+                /**
+                 * e.g.
+                 *      '1 + 2 + 3 * 4'
+                 *      '(1 + 2 + 3) * 4'
+                 *      '1 - -1 / (1 - 1 / -(2 + -1 / -3)) - 0.7'
+                 *      '2 * (3 + 4) / 5 - 6 * (5 - 4 / 3) / 2 + (42 - 1) / 5'
+                 *      
+                 *      'x * 9 / 16'
+                 *      '10000 / x'
+                 *      'x * x / 480 - 240'
+                 *      '1000000 / ((x - 30) * (x - 30))'
+                 */
+                
+                if ( given.match(/x/) ) {
+                    form.out.value = get_values(given);
+                    return;
+                }
+                form.out.value = brackets(given);
+                draw_graph([]);
+                /**
+                 * To check accuracy
+                 */
+                console.log( eval(given.replace(/\-\-/g, "+")) );
+            }
+        
+        </script>
+    </head>
+    <body>
+        
+        <div style="width: 45%; float: right">
+            <form>
+                <input name="out" size="64" type="text" disabled>
+                <br><br>
+                <input name="in" size="64" type="text">
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value=" CLEAR " onclick="clear_input(this.form)">
+                <br><br>
+                <input type="button" value=" FIND " onclick="find_largest(this.form)">
+            </form>
+        </div>
+        
+        <div style="width: 45%; float: left">
+            <form>
+                <input name="out" size="64" type="text" disabled>
+                <br><br>
+                <input name="in" size="64" type="text">
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value=" CLEAR " onclick="clear_input(this.form)">
+                <br><br>
+                <input type="button" value=" CALCULATE " onclick="calculate(this.form)">
+            </form>
+        </div>
+        
+        <div id="draw_wrapper">
+            <canvas id="draw_zone" width="960" height="540"></canvas>
+        </div>
+        
+    </body>
+</html>
