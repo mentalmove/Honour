@@ -1,16 +1,4 @@
 (function(){
-    function restore_code () {
-        if ( !arguments.callee.saved_code_image )
-            return;
-        var draw_zone = iD("draw_zone");
-        draw_zone.style.border = "none";
-        var context = draw_zone.getContext("2d");
-        context.putImageData(arguments.callee.saved_code_image, 0, 0);
-    }
-    window.restore_code = restore_code;
-})();
-
-(function(){
     var scripts = document.getElementsByTagName("script");
     var first_line, first_letter, i, j, content;
     var content_collection = [];
@@ -55,7 +43,12 @@
         }
     }
 
-    restore_code.saved_code_image = context.getImageData(0, 0, draw_zone.width, draw_zone.height);
+    var saved_code_image = context.getImageData(0, 0, draw_zone.width, draw_zone.height);
+    
+    var f = function () {
+        context.putImageData(saved_code_image, 0, 0);
+    };
+    window.restore_code = f;
 
     context.clearRect(0, 0, draw_zone.width, draw_zone.height);
 
