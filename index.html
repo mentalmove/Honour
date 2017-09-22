@@ -205,6 +205,46 @@
             
             /*  */
             
+            /**
+             * Either trivial, either not necessary:
+             *      - Replace '.NUMBER' with '0.NUMBER' - not needed
+             *      - Check if amount of opening and closing brackets is equal
+             *      - Check if closing bracket is never before opening bracket
+             */
+            function validate (term, form) {
+                
+                var tmp;
+                if ( term.match(/(\D)\.(\d)/) ) {
+                    tmp = form.in.value.replace(/(\D\s?)\.(\d)/g, "$10.$2");
+                    form.in.value = tmp;
+                    term = term.replace(/[^\d\(\)+\-\*\/\.x]/g, "");
+                }
+                
+                var open_brackets = term.match(/\(/g);
+                var close_brackets = term.match(/\)/g);
+                
+                if ( open_brackets && close_brackets && open_brackets.length != close_brackets.length ) {
+                    form.out.value = "Wrong number of brackets";
+                    return false;
+                }
+                if ( !open_brackets )
+                    return term;
+                var bracket_count = 0;
+                for ( var i = 0; i < term.length; i++ ) {
+                    if ( term[i] == '(' ) {
+                        bracket_count++;
+                        continue;
+                    }
+                    if ( term[i] == ')' )
+                        bracket_count--;
+                    if ( bracket_count < 0 ) {
+                        form.out.value = "Wrong order of brackets";
+                        return false;
+                    }
+                }
+                
+                return term;
+            }
             function minus_to_z (raw_term) {
                 var term = raw_term.replace(/^\-/, "z");
                 term = term.replace(/([+\-\*\/\(])(\-)(\d)/g, "$1z$3");
@@ -231,7 +271,7 @@
                         to_return = first * second;
                     break;
                     case "/":
-                        if ( values[1] == "0" )
+                        if ( values[1] == '0' )
                             return "0";
                         to_return = first / second;
                 }
@@ -290,11 +330,11 @@
                 
                 var open_bracket;
                 for ( var i = 0; i < term.length; i++ ) {
-                    if ( term[i] == "(" ) {
+                    if ( term[i] == '(' ) {
                         open_bracket = i;
                         continue;
                     }
-                    if ( term[i] == ")" )
+                    if ( term[i] == ')' )
                         /**
                          * Replace most inner bracket with calculated result
                          */
@@ -314,6 +354,12 @@
                     clear_input(form);
                     return;
                 }
+                /**
+                 * Preventing users writing nonsense is not part of this task
+                 */
+                //given = validate(given, form);
+                //if ( !given )
+                    //return;
                 
                 /**
                  * e.g.
@@ -341,6 +387,8 @@
             }
             
             function demonstrate () {
+                if ( !window.location || !location.href || location.href.indexOf("github.io") == -1 )
+                    return;
                 var forms = document.getElementsByTagName("form");
                 clear_input(forms[0]);
                 clear_input(forms[1]);
