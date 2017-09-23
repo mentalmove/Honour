@@ -1,7 +1,7 @@
 # About this project
 
 Recently, I was asked to solve the exercises presented here in
-(in my view) unreasonable time. Since I was not satisfied with
+(in my view) unreasonably time. Since I was not satisfied with
 the solutions I gave, I rewrote them without time pressure
 for its own sake; this should explain the project title.
 
