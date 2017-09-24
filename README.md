@@ -232,8 +232,7 @@ Start with most inner bracket
 ```
 `brackets()` is called 12 times  
 `evaluate()` is called 14 times  
-Overall amount of characters, given to `brackets()`: 366  
-Number of characters, respected by `brackets()`: 157
+Number of characters, respected by `brackets()`: 163 (of 366 given)
 
 &nbsp;
 
@@ -302,5 +301,4 @@ Start with most outer bracket
 ```
 `brackets()` is called 24 times  
 `evaluate()` is called 14 times  
-Overall amount of characters, given to `brackets()`: 278  
-Number of characters, respected by `brackets()`: 198
+Number of characters, respected by `brackets()`: 247 (of 278 given)
