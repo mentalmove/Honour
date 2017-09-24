@@ -302,3 +302,72 @@ Start with most outer bracket
 `brackets()` is called 24 times  
 `evaluate()` is called 14 times  
 Number of characters, respected by `brackets()`: 247 (of 278 given)
+
+&nbsp;
+
+Even combining inner and outer brackets doesn't help:
+```javascript
+var to_evaluate = "";
+var bracket_content = "";
+var bracket_counter = 0;
+var allow_inner = 1;
+for ( var i = 0; i < term.length; i++ ) {
+    if ( term[i] == '(' ) {
+        if ( bracket_counter ) {
+            bracket_content += "(";
+            allow_inner = 0;
+        }
+        bracket_counter++;
+        continue;
+    }
+    if ( term[i] == ')' ) {
+        bracket_counter--;
+        if ( !allow_inner && bracket_counter )
+            bracket_content += ")";
+        if ( !bracket_counter ) {
+            if ( allow_inner )
+                to_evaluate += evaluate( bracket_content );
+            else
+                to_evaluate += brackets( bracket_content );
+            bracket_content = "";
+            allow_inner = 1;
+        }
+        continue;
+    }
+    if ( !bracket_counter )
+        to_evaluate += term[i];
+    else
+        bracket_content += term[i];
+}
+
+return evaluate(to_evaluate);
+```
+
+leads to
+```
+(01)    ((1 - (2 - (3 - (4 - (5 - 6))))) - 7 * (7 - (6 - (5 - (4 - (3 - 2))))) + 1) * -1
+(02)    (1 - (2 - (3 - (4 - (5 - 6))))) - 7 * (7 - (6 - (5 - (4 - (3 - 2))))) + 1
+(03)    1 - (2 - (3 - (4 - (5 - 6))))
+(04)    2 - (3 - (4 - (5 - 6)))
+(05)    3 - (4 - (5 - 6))
+(06)    4 - (5 - 6)
+             5 - 6 = -1
+             4 - -1 = 5
+             3 - 5 = -2
+             2 - -2 = 4
+             1 - 4 = -3
+(07)    7 - (6 - (5 - (4 - (3 - 2))))
+(08)    6 - (5 - (4 - (3 - 2)))
+(09)    5 - (4 - (3 - 2))
+(10)    4 - (3 - 2)
+             3 - 2 = 1
+             4 - 1 = 3
+             5 - 3 = 2
+             6 - 2 = 4
+             7 - 4 = 3
+             -3 - 7 * 3 + 1 = -3 - 21 + 1 = -24 + 1 = -23
+             -23 * -1 = 23
+```
+`brackets()` is called 10 times  
+`evaluate()` is called 14 times  
+Number of characters, respected by `brackets()`: 203 (of 203 given)
