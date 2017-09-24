@@ -322,8 +322,6 @@ for ( var i = 0; i < term.length; i++ ) {
     }
     if ( term[i] == ')' ) {
         bracket_counter--;
-        if ( !allow_inner && bracket_counter )
-            bracket_content += ")";
         if ( !bracket_counter ) {
             if ( allow_inner )
                 to_evaluate += evaluate( bracket_content );
@@ -332,6 +330,8 @@ for ( var i = 0; i < term.length; i++ ) {
             bracket_content = "";
             allow_inner = 1;
         }
+        else
+            bracket_content += ")";
         continue;
     }
     if ( !bracket_counter )
