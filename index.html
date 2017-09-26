@@ -197,7 +197,17 @@
                 }
                 else {
                     var values = [];
-                    var tmp_values;                    
+                    var tmp_values;
+                    
+                    var split_term = term.split("/");
+                    var all_x_len = term.match(/x/g).length;
+                    if ( split_term.length > 1 ) {
+                        var first_x_len = split_term[0].match(/x/g);
+                        first_x_len = (!first_x_len) ? 0 : first_x_len.length;
+                        if ( (all_x_len - first_x_len) > 1 )
+                            step = 1;
+                    }
+                    
                     for ( i = lowest[0]; i < highest[0]; i += step ) {
                         tmp_term = term.replace(/x/g, "" + i);
                         result = Math.round(parseFloat(brackets(tmp_term)));
