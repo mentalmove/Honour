@@ -371,3 +371,50 @@ leads to
 `brackets()` is called 10 times  
 `evaluate()` is called 14 times  
 Number of characters, respected by `brackets()`: 203 (of 203 given)
+
+&nbsp;
+
+## Upper right corner - Number search
+
+> A number is seen as **special** if the value of each single digit is not greater than any digit's value right of it.  
+> Find the highest _special_ number lower than or equal a given number.
+
+&nbsp;
+
+From a mathematical point of view, a solution could be
+```
+Define SPECIAL_NUMBER having the same value as GIVEN_NUMBER
+While SPECIAL_NUMBER doesn't satisfy the condition
+    Decrease SPECIAL_NUMBER by 1
+```
+This is perfectly valid but probably needs a lot of steps.
+
+&nbsp;
+
+Most simple fast solution is
+```
+Iterate through digits from most left to second most right
+    If actual digit's value is greater than succeeding digit's value
+        Decrease actual digit's value by 1
+        Set all succeeding digits' values to 9
+        Start again
+If first value is 0
+    Drop first digit
+```
+
+&nbsp;
+
+If the digit before the actual digit has a value not equal the actual digit's (previous) value, `Start again` is not necessary. Therefore, most given numbers would benefit of the following:
+```
+Iterate through digits from most left to second most right
+    If actual digit's value is greater than succeeding digit's value
+        Decrease actual digit's value by 1
+        Set all succeeding digits' values to 9
+        If preceding digit exists and preceding digit's value is greater than actual digit's value
+            Start again
+        Stop iteration
+If first value is 0
+    Drop first digit
+```
+
+Nothing more to say about it.
