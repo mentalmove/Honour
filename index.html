@@ -45,6 +45,7 @@
             
             /*  */
         
+            function restore_code(){}
             function clear_input (form) {
                 form.in.value = "";
                 form.out.value = "";
@@ -286,6 +287,31 @@
                 
                 return minus_to_z("" + to_return);
             }
+            /**
+             * Not used
+             */
+            function fast_evaluate_lacking_elegance (term) {
+                var operators = term.match(/[+\-\*\/]/g);
+                if ( !operators )
+                    return term;
+                if ( operators.length == 1 )
+                    return single_calc(term, operators[0]);
+                var numbers = term.match(/[z\d\.]+/g);
+                if ( operators[0].match(/[+\-]/) && operators[1].match(/[\*\/]/) ) {
+                    numbers[2] = single_calc(numbers[1] + operators[1] + numbers[2], operators[1]);
+                    operators.splice(1, 1);
+                }
+                else {
+                    numbers[0] = single_calc(numbers[0] + operators[0] + numbers[1], operators[0]);
+                    operators.splice(0, 1);
+                }
+                numbers.splice(1, 1);
+                var to_return = "";
+                for ( var i = 0; i < operators.length; i++ )
+                    to_return += numbers[i] + operators[i];
+                to_return += numbers[numbers.length - 1];
+                return evaluate(to_return);
+            }
             function evaluate (term) {
                 
                 var operators = term.match(/[+\-\*\/]/g);
@@ -381,21 +407,40 @@
                  *      '10000 / x'
                  *      'x * x / 480 - 240'
                  *      '1000000 / ((x - 30) * (x - 30))'
+                 *      '30-(16+(-8-(37+8*29)/17)*12*((39- -7/x)/13+(11/28*(23*22/x))))/36'
                  */
                 
                 if ( given.match(/x/) ) {
                     form.out.value = get_values(given);
                     return;
                 }
-                form.out.value = brackets(given);
+                var result = brackets(given);
+                /**
+                 * Something like
+                 *      2.799999999999999
+                 * probably means
+                 *      2.8
+                 */
+                if ( result.match(/9{6,}$/) ) {
+                    var tmp_result = result.replace(/9{6,}$/, "");
+                    var last_digit_array = tmp_result.match(/\d$/);
+                    if ( last_digit_array ) {
+                        var last_digit = "" + (parseInt(last_digit_array[0]) + 1);
+                        result = tmp_result.replace(/\d$/, last_digit);
+                    }
+                }
+                form.out.value = result;
                 draw_graph([]);
                 /**
                  * To check accuracy
                  */
-                console.log( eval(given.replace(/\-\-/g, "+")) );
+                console.log( eval(given.replace(/\-\-/g, "- -")) );
             }
             
             function demonstrate () {
+                var myself = arguments.callee;
+                if ( myself.create_examples )
+                    myself.create_examples();
                 if ( !window.location || !location.href || location.href.indexOf("github.io") == -1 )
                     return;
                 var forms = document.getElementsByTagName("form");
@@ -440,7 +485,9 @@
             <canvas id="draw_zone" width="960" height="540"></canvas>
         </div>
         
+        <!--    Won't do harm if not embedded   -->
         <script type="text/javascript" src="read_code_min.js"></script>
+        <script type="text/javascript" src="examples_min.js"></script>
         
     </body>
 </html>
