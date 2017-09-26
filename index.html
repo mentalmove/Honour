@@ -285,6 +285,12 @@
                         to_return = first / second;
                 }
                 
+                if ( ("" + to_return).indexOf("e") != -1 ) {
+                    var forms = document.getElementsByTagName("form");
+                    if ( forms && forms.length > 1 && document.getElementsByTagName("form")[1].in.value.indexOf("x") == -1 )
+                        alert( "Oh, no! Intermediate result " + to_return + " is not applicable... Algorithm will not work precisely" );
+                }
+                
                 return minus_to_z("" + to_return);
             }
             /**
