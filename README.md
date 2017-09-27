@@ -5,7 +5,35 @@ Recently, I was asked to solve the exercises presented here in
 the solutions I gave, I rewrote them without time pressure
 for its own sake; this should explain the project title.
 
+&nbsp;
+
 ## Upper left corner - Term Calculator
+
+> Build a term calculator that accepts numbers, brackets and basic operators (`+`, `-`, `*`, `/`).
+
+&nbsp;
+
+The task does not really need imaginative thinking; largest challenge was telling the different meanings of `-` apart.
+
+Overall plan is
+```
+As long as term has brackets
+    Replace first most inner bracket with calculation of its content
+Calculate remainig term
+```
+
+The strategy for calculation is
+```
+If one number is given            // only necessary with superfluous brackets
+    Result is number
+If two numbers are given
+    Result is [first number] [operator] [second number]
+If three or more numbers are given
+    Put brackets around first and second or second and third number, following common rules
+    Give altered term to overall function to get result
+```
+
+&nbsp;
 
 ```
 ((1 - (2 - (3 - (4 - (5 - 6))))) - 7 * (7 - (6 - (5 - (4 - (3 - 2))))) + 1) * -1
@@ -374,7 +402,7 @@ Number of characters, respected by `brackets()`: 203 (of 203 given)
 
 &nbsp;
 
-## Upper right corner - Number search
+## Upper right corner - Number Search
 
 > A number is seen as **special** if the value of each single digit is not greater than any digit's value right of it.  
 > Find the highest _special_ number lower than or equal a given number.
@@ -404,7 +432,7 @@ If first value is 0
 
 &nbsp;
 
-If the digit before the actual digit has a value not equal the actual digit's (previous) value, `Start again` is not necessary. Therefore, most given numbers would benefit of the following:
+If the digit before the actual digit has a value not equal the actual digit's (original) value, `Start again` is not necessary. Therefore, most given numbers would benefit of the following:
 ```
 Iterate through digits from most left to second most right
     If actual digit's value is greater than succeeding digit's value
