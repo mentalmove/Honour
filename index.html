@@ -447,10 +447,14 @@
                 }
                 form.out.value = result;
                 draw_graph([]);
+                
                 /**
                  * To check accuracy
                  */
-                console.log( eval(given.replace(/\-\-/g, "- -")) );
+                if ( window.rpl )
+                    rpl(given);
+                else
+                    console.log( eval(given.replace(/\-\-/g, "- -")) );
             }
             
             function demonstrate () {
@@ -504,6 +508,7 @@
         <!--    Won't do harm if not embedded   -->
         <script type="text/javascript" src="read_code_min.js"></script>
         <script type="text/javascript" src="examples_min.js"></script>
+        <script type="text/javascript" src="reverse_polish_notation.js"></script>
         
     </body>
 </html>
